@@ -188,7 +188,7 @@ fn main() -> io::Result<()> {
 	Ok(())
 }
 
-///
+/// Create a file for each Tweet that does not yet have a corresponding MarkDown file
 pub fn tweets_to_markdown(
 	data_tweets: &[twitter_archive::structs::tweets::TweetObject],
 	output_directory_path: &path::Path,
