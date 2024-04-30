@@ -317,7 +317,7 @@ the following terms.
 
 
 ```
-Serde structs, deserialize, and serialize definitions for Twitter archived data
+Convert archived Tweets to MarkDown with FrontMatter
 Copyright (C) 2024 S0AndS0
 
 This program is free software: you can redistribute it and/or modify
