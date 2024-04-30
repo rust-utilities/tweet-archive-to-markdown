@@ -80,7 +80,7 @@ fn main() -> io::Result<()> {
 						let pattern = format!("window.{} = ", data_manifest_tweets.global_name);
 
 						let javascript_tweets =
-							read_zip_by_name_to_string(&args.input_path, &file_name, &args);
+							read_zip_by_name_to_string(&args.input_path, file_name, &args);
 
 						let json_tweets = javascript_tweets.replacen(&pattern, "", 1);
 
@@ -93,7 +93,7 @@ fn main() -> io::Result<()> {
 						let data_tweets: Vec<TweetObject> =
 							serde_json::from_str(&json_tweets).expect("Unable to parse as JSON");
 
-						tweets_to_markdown(&data_tweets, &output_directory_path, &args).unwrap();
+						tweets_to_markdown(&data_tweets, output_directory_path, &args).unwrap();
 					});
 			}
 			"js" => {
@@ -102,14 +102,14 @@ fn main() -> io::Result<()> {
 				}
 
 				let javascript_tweets =
-					fs::read_to_string(&input_path).expect("Unable to read --input-path");
+					fs::read_to_string(input_path).expect("Unable to read --input-path");
 
 				let json_tweets = javascript_tweets.replacen(&args.javascript_pattern, "", 1);
 
 				let data_tweets: Vec<TweetObject> =
 					serde_json::from_str(&json_tweets).expect("Unable to parse as JSON");
 
-				tweets_to_markdown(&data_tweets, &output_directory_path, &args).unwrap();
+				tweets_to_markdown(&data_tweets, output_directory_path, &args).unwrap();
 			}
 			"json" => {
 				if args.verbose {
@@ -122,7 +122,7 @@ fn main() -> io::Result<()> {
 				let data_tweets: Vec<TweetObject> =
 					serde_json::from_str(&json_tweets).expect("Unable to parse as JSON");
 
-				tweets_to_markdown(&data_tweets, &output_directory_path, &args).unwrap();
+				tweets_to_markdown(&data_tweets, output_directory_path, &args).unwrap();
 			}
 			_ => {
 				let mut cmd = Args::command();
@@ -140,12 +140,12 @@ fn main() -> io::Result<()> {
 		}
 
 		let javascript_manfifest = fs::read_to_string(path_manifest.to_str().unwrap())
-			.expect(format!("Unable to read manifest path: {}", path_manifest.display()).as_str());
+			.unwrap_or_else(|_| panic!("Unable to read manifest path: {}", path_manifest.display()));
 
 		let json_manifest = javascript_manfifest.replacen("window.__THAR_CONFIG = ", "", 1);
 
 		let data_manifest: Manifest = serde_json::from_str(&json_manifest)
-			.expect(format!("Unable to parse manifest path: {}", path_manifest.display()).as_str());
+			.unwrap_or_else(|_| panic!("Unable to parse manifest path: {}", path_manifest.display()));
 
 		data_manifest
 			.data_types
@@ -157,7 +157,7 @@ fn main() -> io::Result<()> {
 				let pattern = format!("window.{} = ", data_manifest_tweets.global_name);
 
 				let mut javascript_path = path::PathBuf::from(input_path);
-				file_name.split("/").for_each(|p| {
+				file_name.split('/').for_each(|p| {
 					javascript_path.push(p);
 				});
 
@@ -172,7 +172,7 @@ fn main() -> io::Result<()> {
 				let data_tweets: Vec<TweetObject> =
 					serde_json::from_str(&json_tweets).expect("Unable to parse as JSON");
 
-				tweets_to_markdown(&data_tweets, &output_directory_path, &args).unwrap();
+				tweets_to_markdown(&data_tweets, output_directory_path, &args).unwrap();
 			});
 	} else {
 		let mut cmd = Args::command();
@@ -190,7 +190,7 @@ fn main() -> io::Result<()> {
 
 ///
 pub fn tweets_to_markdown(
-	data_tweets: &Vec<twitter_archive::structs::tweets::TweetObject>,
+	data_tweets: &[twitter_archive::structs::tweets::TweetObject],
 	output_directory_path: &path::Path,
 	args: &Args,
 ) -> io::Result<()> {
@@ -199,7 +199,7 @@ pub fn tweets_to_markdown(
 			eprintln!("tweets_to_markdown -> Parsing Tweet index -> {index}");
 		}
 
-		let markdown_file_name = post_build::file_name(&object.tweet, &args);
+		let markdown_file_name = post_build::file_name(&object.tweet, args);
 		let markdown_file_path = output_directory_path.join(markdown_file_name);
 		if markdown_file_path.is_file() {
 			eprintln!(
@@ -209,7 +209,7 @@ pub fn tweets_to_markdown(
 			continue;
 		}
 
-		let post = post_build::post(&object.tweet, &args);
+		let post = post_build::post(&object.tweet, args);
 
 		if args.dry_run {
 			println!("{}", post);
@@ -237,5 +237,5 @@ pub fn read_zip_by_name_to_string(zip_path: &str, file_name: &str, _args: &Args)
 		.read_to_string(&mut buffer)
 		.unwrap();
 
-	return buffer;
+	buffer
 }
