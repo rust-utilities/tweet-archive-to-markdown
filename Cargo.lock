@@ -638,7 +638,7 @@ checksum = "ef927ca75afb808a4d64dd374f00a2adf8d0fcff8e7b184af886c3c87ec4a3f3"
 
 [[package]]
 name = "tweet-archive-to-markdown"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "chrono",
  "clap",
